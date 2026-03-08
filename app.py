@@ -7,7 +7,7 @@ st.set_page_config(page_title="The Supreme Compliance Council", page_icon="⚖�
 st.title("⚖️ The Supreme Compliance Council")
 st.markdown("---")
 
-# 2. Sidebar Quick-Links (The Hyperlinks)
+# 2. Sidebar Quick-Links
 st.sidebar.header("🔗 Regulatory Reference Library")
 st.sidebar.markdown("""
 * [NYCRR Title 10 (NYSDOH)](https://govt.westlaw.com/nycrr/index?contextData=(sc.Default)&rs=confluence.1.0)
@@ -17,7 +17,7 @@ st.sidebar.markdown("""
 * [Stark Law (42 U.S.C.)](https://www.law.cornell.edu/uscode/text/42/1395nn)
 """)
 
-# 3. Connection to OpenRouter
+# 3. Connection
 client = openai.OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=st.secrets["OPENROUTER_API_KEY"],
@@ -33,26 +33,14 @@ if st.button("Convene the Council"):
     else:
         with st.status("The Council is auditing the records...", expanded=True) as status:
             try:
-                # THE FINAL SCHOLARLY AUDITOR PROMPT
                 prompt = f"""
                 Analyze this healthcare compliance issue: {query}
                 
-                STRUCTURE YOUR RESPONSE EXACTLY AS FOLLOWS:
-
-                1. FORMAL REGULATORY FINDINGS (EXECUTIVE SUMMARY): 
-                   Write a dense, professional paragraph addressed to Andrew Weingarten, MHA. 
-                   Include superscript footnote markers like this [1], [2] at the end of key legal or regulatory statements.
-
-                2. THE COUNCIL DELIBERATION (THE CHAOS):
-                   Provide a witty, multi-personality breakdown (Kingsfield, Larry David, Uncle Phil, Saul Goodman, RBG, Obama, etc.).
-
-                3. FINAL VERDICT & GRADE:
-                   Professor Kingsfield delivers the final 'Zero or One' grade and Risk Level.
-
-                4. FOOTNOTES & CITATION KEY (NO GUESSING):
-                   Provide a numbered list matching the markers [1], [2] above.
-                   For each number, state EXACTLY what it means, the specific statute or regulation title (e.g., 10 NYCRR § 415.13), 
-                   and provide a clickable hyperlink to the source so Andrew can verify the law.
+                STRUCTURE:
+                1. FORMAL REGULATORY FINDINGS: Write a dense, professional paragraph for Andrew Weingarten, MHA. Include superscript footnote markers like [1], [2].
+                2. THE COUNCIL DELIBERATION: Multi-personality breakdown (Kingsfield, LD, Uncle Phil, Saul, RBG, Obama, etc.).
+                3. FINAL VERDICT & GRADE: Professor Kingsfield delivers the final 'Zero or One' grade.
+                4. FOOTNOTES & CITATION KEY: Numbered list matching [1], [2]. State EXACTLY what it means and provide a clickable hyperlink.
                 """
                 
                 res = client.chat.completions.create(
@@ -72,7 +60,6 @@ if st.button("Convene the Council"):
                 pdf.set_font("Arial", size=10)
                 
                 def clean_text(text):
-                    # Strip emojis and non-Latin1 chars that crash PDF generators
                     return text.encode('ascii', 'ignore').decode('ascii')
                 
                 p_query = clean_text(query)
@@ -85,4 +72,9 @@ if st.button("Convene the Council"):
                 st.download_button(
                     label="📥 Download Audit Report (PDF)", 
                     data=pdf_output, 
-                    file_name="audit_verdict
+                    file_name="audit_verdict.pdf", 
+                    mime="application/pdf"
+                )
+
+            except Exception as e:
+                st.error(f"The Council is in a heated sidebar. Error: {e}")
