@@ -31,8 +31,7 @@ if st.button("Convene the Council"):
 
                 1. FORMAL REGULATORY FINDINGS: 
                    Write a single, dense, professional paragraph in the style of Westlaw, Paxton AI, and the ABA. 
-                   Use citations where appropriate (e.g., 42 U.S.C. § 1320a-7b). 
-                   Address this to Andrew Weingarten, MHA. It must be cold, analytical, and authoritative.
+                   Address this to Andrew Weingarten, MHA. Use legal citations and cold, analytical authority.
 
                 2. THE COUNCIL DELIBERATION (THE CHAOS):
                    Provide a witty, multi-personality breakdown from these voices:
@@ -63,18 +62,22 @@ if st.button("Convene the Council"):
                 st.write("### 📜 The Official Council Verdict:")
                 st.markdown(verdict)
 
-                # --- PDF GENERATION ---
+                # --- PDF GENERATION (THE ERROR FIX) ---
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_font("Arial", size=10)
                 
-                # Cleaning characters for Latin-1 PDF
-                clean_verdict = verdict.replace('\u2013', '-').replace('\u2014', '-').replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"').replace('\u2026', '...')
-                clean_query = query.replace('\u2013', '-').replace('\u2014', '-').replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"').replace('\u2026', '...')
+                # Replace tricky characters for Latin-1 PDF compatibility
+                def clean_text(text):
+                    return text.encode('ascii', 'ignore').decode('ascii')
                 
-                pdf.multi_cell(0, 10, txt=f"ISSUE SUBMITTED:\n{clean_query}\n\nVERDICT:\n{clean_verdict}".encode('latin-1', 'replace').decode('latin-1'))
+                p_query = clean_text(query)
+                p_verdict = clean_text(verdict)
                 
-                pdf_output = pdf.output(dest='S')
+                pdf.multi_cell(0, 10, txt=f"ISSUE SUBMITTED:\n{p_query}\n\nVERDICT:\n{p_verdict}")
+                
+                # Use 'dest=S' and wrap in bytes() to ensure Streamlit likes it
+                pdf_output = bytes(pdf.output())
                 
                 st.download_button(
                     label="📥 Download Council Verdict (PDF)", 
