@@ -3,107 +3,143 @@ import openai
 from fpdf import FPDF
 
 # 1. Page Config
-st.set_page_config(page_title="The Supreme Compliance Council", page_icon="⚖️", layout="wide")
-st.title("⚖️ The Supreme Compliance Council")
-st.markdown("---")
+st.set_page_config(page_title="The Times: Legal Affairs", layout="centered")
 
-# 2. Sidebar Quick-Links for easy reference
-st.sidebar.header("🔗 Regulatory Reference Library")
-st.sidebar.markdown("""
-* [NYCRR Title 10 (NYSDOH)](https://govt.westlaw.com/nycrr/index?contextData=(sc.Default)&rs=confluence.1.0)
-* [CMS State Operations Manual](https://www.cms.gov/medicare/provider-enrollment-and-certification/guidanceforlawsandregulations/nursing-homes)
-* [Anti-Kickback Statute (42 U.S.C.)](https://www.law.cornell.edu/uscode/text/42/1320a-7b)
-* [HIPAA Privacy Rule](https://www.hhs.gov/hipaa/index.html)
-""")
+# 2. Advanced NYT Digital CSS
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Lora:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;700&display=swap');
 
-# 3. Connection
+    /* Global Body Styling */
+    html, body, [class*="css"] {
+        font-family: 'Lora', serif !important;
+        background-color: #ffffff;
+        color: #121212;
+    }
+
+    /* The Masthead */
+    .masthead {
+        text-align: center;
+        border-bottom: 2px solid #121212;
+        padding-bottom: 5px;
+        margin-bottom: 2px;
+    }
+    .masthead h1 {
+        font-family: 'Playfair Display', serif !important;
+        font-size: 65px !important;
+        font-weight: 700;
+        margin-bottom: 0px;
+        letter-spacing: -2px;
+    }
+    .date-line {
+        font-family: 'Libre Franklin', sans-serif;
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: 700;
+        border-bottom: 1px solid #e2e2e2;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Section Headers */
+    .section-header {
+        font-family: 'Libre Franklin', sans-serif;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 1px;
+        border-top: 1px solid #121212;
+        padding-top: 5px;
+        margin-top: 30px;
+    }
+
+    /* Article Body */
+    .article-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 15px;
+    }
+    
+    .stTextArea textarea {
+        border-radius: 0px;
+        border: 1px solid #e2e2e2;
+        font-family: 'Lora', serif !important;
+    }
+
+    /* Button Styling */
+    .stButton > button {
+        background-color: #121212;
+        color: white;
+        font-family: 'Libre Franklin', sans-serif;
+        text-transform: uppercase;
+        font-weight: 700;
+        border-radius: 0px;
+        width: 100%;
+        border: none;
+    }
+    
+    .stButton > button:hover {
+        background-color: #333333;
+        color: white;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# 3. NYT Digital Masthead
+st.markdown('<div class="masthead"><h1>The New York Times</h1></div>', unsafe_allow_html=True)
+st.markdown('<div class="date-line">Sunday, March 8, 2026 &nbsp; | &nbsp; Legal & Compliance Edition</div>', unsafe_allow_html=True)
+
+# 4. Input Area (The "Lead Story" Submission)
+st.markdown('<div class="section-header">Case Submission</div>', unsafe_allow_html=True)
+query = st.text_area("", placeholder="Enter the details of the regulatory matter here...", height=150)
+
+# 5. Connection
 client = openai.OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=st.secrets["OPENROUTER_API_KEY"],
 )
 
-# 4. Input
-query = st.text_area("State your case (Plain English is fine!):", 
-                     placeholder="e.g., A provider is charging extra for 'premium water' in the waiting room...")
-
-if st.button("Convene the Council"):
+if st.button("Publish Analysis"):
     if not query:
-        st.warning("The Council requires a prompt. It’s a society!")
+        st.warning("A case submission is required to publish.")
     else:
-        with st.status("Drafting the Straight-Talk Memo & Convening the Nuts...", expanded=True) as status:
+        with st.status("Gathering Testimony...", expanded=True):
             try:
-                # THE HYBRID PROMPT
                 prompt = f"""
                 Analyze this issue: {query}
-                
-                STRUCTURE YOUR RESPONSE EXACTLY LIKE THIS:
-
-                ### 📝 THE STRAIGHT-TALK SUMMARY (The "Fred" Version)
-                *Write a 3-4 sentence 'plain English' summary of what is happening here so anyone can understand it instantly.*
-
-                ---
-
-                ### 📜 OFFICIAL EXECUTIVE MEMORANDUM
-                **Subject:** Analysis of {query[:40]}...
-                **To:** Andrew Weingarten, MHA
-                
-                **ABSTRACT**
-                A formal, professional summary of the regulatory findings.
-                
-                **ISSUE PRESENTED**
-                - Bullet points of the specific legal/compliance questions.
-                
-                **LEGAL RATIONALE**
-                A dense, formal paragraph using professional terminology. 
-                YOU MUST ATTACH HOVER-PREVIEW CITATIONS [[n]](URL "PREVIEW TEXT") TO EVERY CLAIM.
-
-                **THE VERDICT**
-                Final Judgment and Mandates.
-
-                ---
-
-                ### 🤡 THE COUNCIL DELIBERATION (The Nuts)
-                *Provide the witty, multi-personality breakdown:*
-                - Professor Kingsfield (The Paper Chase)
-                - Larry David & Jerry Seinfeld (Neurotic skepticism)
-                - Uncle Phil (Moral authority)
-                - Saul Goodman & Jackie Chiles (Loopholes & Outrage)
-                - RBG & Obama (Measured precision)
-                - Vinny Gambino (Common sense)
-                - Dr. Gonzo (Legal-adjacent insanity)
-
-                ---
-
-                ### 🎓 FINAL GRADE
-                Professor Kingsfield's 0 or 1 grade.
-
-                ### 📑 FOOTNOTES & CITATION KEY
-                Detailed list of all regulations mentioned with live links.
+                STRUCTURE:
+                1. STRAIGHT-TALK SUMMARY: 3-4 sentence plain English lead.
+                2. FORMAL MEMORANDUM: Subject, To (Andrew Weingarten, MHA), Abstract, Issue Presented, Legal Rationale (with hover links), and Verdict.
+                3. THE COUNCIL DELIBERATION: The multi-personality breakdown (No Emojis).
+                4. FINAL GRADE: Kingsfield 0 or 1.
+                5. CITATION KEY.
                 """
                 
                 res = client.chat.completions.create(
                     model="google/gemini-2.0-flash-001", 
                     messages=[
-                        {"role": "system", "content": "You are a professional auditor who balances high-level legal precision with plain-English accessibility. You never use conversational filler like 'Okay'."},
+                        {"role": "system", "content": "You are an elite legal analyst for a major newspaper. Use formal, crisp language. No emojis."},
                         {"role": "user", "content": prompt}
                     ]
                 )
                 
-                verdict = res.choices[0].message.content
-                status.update(label="Analysis Complete!", state="complete", expanded=False)
+                output = res.choices[0].message.content
                 
-                st.write(verdict)
+                # Split output into sections for NYT styling
+                st.markdown('<div class="section-header">Analysis</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="article-title">The Compliance Brief: {query[:50]}...</div>', unsafe_allow_html=True)
+                st.markdown(output)
 
                 # --- PDF GENERATION ---
                 pdf = FPDF()
                 pdf.add_page()
-                pdf.set_font("Arial", size=10)
-                def clean_text(text): return text.encode('ascii', 'ignore').decode('ascii')
-                p_verdict = clean_text(verdict)
-                pdf.multi_cell(0, 10, txt=f"OFFICIAL AUDIT REPORT\nSUBMITTED BY: Andrew Weingarten, MHA\n\n{p_verdict}")
-                
+                pdf.set_font("Times", size=10)
+                pdf.multi_cell(0, 10, txt=f"OFFICIAL RECORD: {query[:30]}\n\n{output.encode('ascii', 'ignore').decode('ascii')}")
                 pdf_output = bytes(pdf.output())
-                st.download_button(label="📥 Download Audit Report (PDF)", data=pdf_output, file_name="audit_verdict.pdf", mime="application/pdf")
+                st.download_button(label="Download Full Article (PDF)", data=pdf_output, file_name="NYT_Legal_Brief.pdf")
 
             except Exception as e:
-                st.error(f"The Council is in a heated sidebar. Error: {e}")
+                st.error(f"The printing press stalled: {e}")
