@@ -6,7 +6,7 @@ from datetime import date
 # 1. Page Config
 st.set_page_config(page_title="Legal & Compliance Copilot", layout="centered")
 
-# 2. NYT Digital App UI Styling (Updated for Title Case & Clean Subline)
+# 2. NYT Digital App UI Styling
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Lora:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;700&display=swap');
@@ -18,7 +18,7 @@ st.markdown("""
         color: #121212;
     }
 
-    /* Masthead - Refined Title Case Styling */
+    /* Masthead Styling */
     .masthead-container {
         text-align: center;
         border-bottom: 2px solid #121212;
@@ -45,7 +45,7 @@ st.markdown("""
         letter-spacing: 1px;
     }
 
-    /* Section Labeling */
+    /* Section Labeling for Results */
     .section-label {
         font-family: 'Libre Franklin', sans-serif;
         font-weight: 700;
@@ -94,14 +94,13 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Branding & Date Line (Simplified)
+# 3. Branding & Date Line
 today = date.today().strftime("%A, %B %d, %Y")
 st.markdown(f'<div class="masthead-container"><div class="masthead-title">My Legal and Compliance Copilot</div></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="masthead-subline">{today}</div>', unsafe_allow_html=True)
 
-# 4. Submission Module
-st.markdown('<div class="section-label">Case Briefing</div>', unsafe_allow_html=True)
-query = st.text_area("", placeholder="Enter regulatory matter or legal facts for analysis...", height=150, label_visibility="collapsed")
+# 4. Clean Submission Input (No Label)
+query = st.text_area("", placeholder="Enter the regulatory matter or legal facts for analysis...", height=180, label_visibility="collapsed")
 
 # 5. Tool Connection
 client = openai.OpenAI(
@@ -115,7 +114,7 @@ if st.button("Generate Official Analysis"):
     else:
         with st.status("Analyzing Precedent...", expanded=True):
             try:
-                # Hybrid Prompt
+                # Executive Hybrid Prompt
                 prompt = f"""
                 Analyze this issue: {query}
                 
