@@ -13,7 +13,7 @@ st.sidebar.markdown("""
 * [NYCRR Title 10 (NYSDOH)](https://govt.westlaw.com/nycrr/index?contextData=(sc.Default)&rs=confluence.1.0)
 * [CMS State Operations Manual](https://www.cms.gov/medicare/provider-enrollment-and-certification/guidanceforlawsandregulations/nursing-homes)
 * [Anti-Kickback Statute (42 U.S.C.)](https://www.law.cornell.edu/uscode/text/42/1320a-7b)
-* [SEC / Financial Rules](https://www.sec.gov/rules/final)
+* [HIPAA Privacy Rule (45 CFR 164)](https://www.hhs.gov/hipaa/for-professionals/privacy/index.html)
 * [GDPR / Data Privacy](https://gdpr-info.eu/)
 """)
 
@@ -25,28 +25,28 @@ client = openai.OpenAI(
 
 # 4. Input
 query = st.text_area("State your case for the Council's review:", 
-                     placeholder="State the issue (e.g., LTC staffing, Clark Kent's legal status, etc.)...")
+                     placeholder="e.g., A nurse shared a patient's photo on a private group chat. Define the HIPAA violation, analyze the risk, and provide a resolution.")
 
 if st.button("Convene the Council"):
     if not query:
         st.warning("The Council requires a prompt. It’s a society!")
     else:
-        with st.status("The Council is auditing the records...", expanded=True) as status:
+        with st.status("The Council is conducting a deep-dive audit...", expanded=True) as status:
             try:
-                # THE "CLEAN START" PROMPT
+                # THE "DEEP DIVE" PROMPT
                 prompt = f"""
                 Analyze this issue: {query}
                 
                 CRITICAL INSTRUCTION: 
-                START IMMEDIATELY with a simple, direct introductory sentence. 
-                DO NOT use the word 'Legal' unless it is a court case. 
-                Use the word 'Analysis'.
-                Example: 'This is an analysis of the familial relationship between Jonathan Kent and Clark Kent within the DC Comics universe.'
-
+                START IMMEDIATELY with a direct, professional introductory sentence describing the domain and issue.
+                
                 STRUCTURE:
                 1. FORMAL REGULATORY FINDINGS: 
-                   Professional paragraph for Andrew Weingarten, MHA. 
-                   ATTACH A HOVER-PREVIEW CITATION [[n]](URL "PREVIEW TEXT") TO EVERY CLAIM.
+                   Write a comprehensive, multi-part analysis for Andrew Weingarten, MHA:
+                   - DEFINITION: Define the relevant laws, F-Tags, or statutes involved.
+                   - ANALYSIS: Explain how the situation violates or aligns with these laws.
+                   - RESOLUTION: Provide a formal recommendation or corrective action plan.
+                   ATTACH A HOVER-PREVIEW CITATION [[n]](URL "PREVIEW TEXT") TO EVERY REGULATORY CLAIM.
 
                 2. THE COUNCIL DELIBERATION (THE CHAOS):
                    (Kingsfield, LD, Uncle Phil, Saul, RBG, Obama, etc.)
@@ -55,13 +55,13 @@ if st.button("Convene the Council"):
                    Professor Kingsfield delivers the final 'Zero or One' grade.
 
                 4. FOOTNOTES & CITATION KEY:
-                   Detailed list of all regulations or sources mentioned.
+                   Detailed list of all regulations mentioned with live links.
                 """
                 
                 res = client.chat.completions.create(
                     model="google/gemini-2.0-flash-001", 
                     messages=[
-                        {"role": "system", "content": "You are a professional auditor. You never use conversational filler. You start every response immediately with 'This is an analysis of...' followed by a brief description of the user's query. No brackets, no 'Okay', no 'Sure'."},
+                        {"role": "system", "content": "You are a senior compliance auditor. You provide thorough, multi-layered analyses that include definitions, situational applications, and resolutions. You start every response immediately with 'This is an analysis of...' and never use conversational filler."},
                         {"role": "user", "content": prompt}
                     ]
                 )
