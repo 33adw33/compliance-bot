@@ -25,7 +25,7 @@ client = openai.OpenAI(
 
 # 4. Input
 query = st.text_area("State your case for the Council's review:", 
-                     placeholder="State the issue (e.g., healthcare, tech, finance, or even superheroes)...")
+                     placeholder="What's the issue? (LTC staffing, data privacy, Batman's legal status...)")
 
 if st.button("Convene the Council"):
     if not query:
@@ -33,18 +33,20 @@ if st.button("Convene the Council"):
     else:
         with st.status("The Council is auditing the records...", expanded=True) as status:
             try:
-                # DYNAMIC DOMAIN ADAPTATION PROMPT
+                # THE "NORMAL HUMAN" PROMPT
                 prompt = f"""
                 Analyze this issue: {query}
                 
                 CRITICAL INSTRUCTION: 
-                Identify the specific domain/industry of the query (e.g. Healthcare, Technology, Finance, Civil, etc.). 
-                Start your response IMMEDIATELY with this line:
-                "Based on the findings, I will conduct an analysis of the [DETECTED DOMAIN] compliance implications pertaining to the determination of whether {query[:50]}..., in accordance with the prescribed analytical framework."
+                DO NOT USE CONVERSATIONAL FILLER (No 'Okay', 'Sure', 'I will analyze').
+                START IMMEDIATELY with a single, clear introductory line that explains what the issue is to anyone reading it.
+                Example: 'This is an analysis of the Healthcare compliance implications regarding [The Issue].'
+                
+                (Identify the domain naturally—Healthcare, Technology, Legal, etc.—and do not use brackets).
 
                 STRUCTURE:
                 1. FORMAL REGULATORY FINDINGS: 
-                   Write a professional paragraph for Andrew Weingarten, MHA. 
+                   Professional paragraph for Andrew Weingarten, MHA. 
                    ATTACH A HOVER-PREVIEW CITATION [[n]](URL "PREVIEW TEXT") TO EVERY LEGAL CLAIM.
 
                 2. THE COUNCIL DELIBERATION (THE CHAOS):
@@ -60,7 +62,7 @@ if st.button("Convene the Council"):
                 res = client.chat.completions.create(
                     model="google/gemini-2.0-flash-001", 
                     messages=[
-                        {"role": "system", "content": "You are a professional auditor. Never use conversational filler. Start every response with 'Based on the findings...' and replace [DETECTED DOMAIN] with the appropriate industry."},
+                        {"role": "system", "content": "You are a professional auditor. You never use filler. You start every response immediately with a direct one-sentence introduction explaining the domain and the issue to the reader. No brackets, no robotic pre-amble."},
                         {"role": "user", "content": prompt}
                     ]
                 )
