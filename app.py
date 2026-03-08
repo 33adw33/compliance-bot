@@ -3,10 +3,21 @@ import openai
 from fpdf import FPDF
 from datetime import date
 
-# 1. Page Config
+# 1. Page Config & Interface Extermination
 st.set_page_config(page_title="Legal & Compliance Copilot", layout="centered")
 
-# 2. NYT Digital App UI Styling
+# This CSS block removes all Streamlit branding, menus, and the "Deploy" button
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            header {visibility: hidden;}
+            footer {visibility: hidden;}
+            .stDeployButton {display:none;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
+# 2. Editorial UI Styling
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Lora:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;700&display=swap');
@@ -23,7 +34,7 @@ st.markdown("""
         text-align: center;
         border-bottom: 2px solid #121212;
         padding-bottom: 5px;
-        margin-top: 20px;
+        margin-top: 10px;
     }
     .masthead-title {
         font-family: 'Playfair Display', serif !important;
@@ -45,7 +56,7 @@ st.markdown("""
         letter-spacing: 1px;
     }
 
-    /* Section Labeling for Results */
+    /* Section Labeling */
     .section-label {
         font-family: 'Libre Franklin', sans-serif;
         font-weight: 700;
@@ -99,10 +110,10 @@ today = date.today().strftime("%A, %B %d, %Y")
 st.markdown(f'<div class="masthead-container"><div class="masthead-title">My Legal and Compliance Copilot</div></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="masthead-subline">{today}</div>', unsafe_allow_html=True)
 
-# 4. Clean Submission Input (No Label)
-query = st.text_area("", placeholder="Enter the regulatory matter or legal facts for analysis...", height=180, label_visibility="collapsed")
+# 4. Clean Input Field
+query = st.text_area("", placeholder="Enter details for regulatory analysis...", height=200, label_visibility="collapsed")
 
-# 5. Tool Connection
+# 5. Connection
 client = openai.OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=st.secrets["OPENROUTER_API_KEY"],
@@ -110,11 +121,11 @@ client = openai.OpenAI(
 
 if st.button("Generate Official Analysis"):
     if not query:
-        st.warning("Please provide case details.")
+        st.warning("Submission is empty.")
     else:
-        with st.status("Analyzing Precedent...", expanded=True):
+        with st.status("Performing Audit...", expanded=True):
             try:
-                # Executive Hybrid Prompt
+                # Custom Hybrid Prompt
                 prompt = f"""
                 Analyze this issue: {query}
                 
@@ -127,7 +138,7 @@ if st.button("Generate Official Analysis"):
                    - Summary of Facts
                    - Legal Rationale (Use hover links [[n]](URL "Preview Text"))
                    - The Verdict
-                3. THE COUNCIL DELIBERATION (Kingsfield, Larry David, Saul Goodman, etc. No emojis.)
+                3. THE COUNCIL DELIBERATION (No emojis.)
                 4. FINAL GRADE: 0 or 1.
                 5. CITATION KEY.
                 """
@@ -142,12 +153,12 @@ if st.button("Generate Official Analysis"):
                 
                 output = res.choices[0].message.content
                 
-                # Render Article Output
+                # Render Results
                 st.markdown('<div class="section-label">Findings & Deliberations</div>', unsafe_allow_html=True)
                 st.markdown(f'<div class="article-headline">The Copilot Report: {query[:50]}...</div>', unsafe_allow_html=True)
                 st.markdown(output)
 
-                # PDF Export Logic
+                # PDF Export
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_font("Times", size=10)
