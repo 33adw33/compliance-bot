@@ -1,60 +1,53 @@
 import streamlit as st
-import google.generativeai as genai
-import time
+import openai
 
-st.set_page_config(page_title="SuperBot: Paxton x Gemini", page_icon="⚖️")
-st.title("⚖️ Legal SuperBot")
-st.caption("Powered by Paxton AI (Retrieval) and Gemini (Reasoning)")
+# 1. Page Config (No more "Legal SuperBot"!)
+st.set_page_config(page_title="Chief Compliance Officer Bot", page_icon="🛡️")
+st.title("🛡️ The Compliance Council")
+st.markdown("---")
 
-with st.sidebar:
-    st.header("Credentials")
-    gemini_api_key = st.text_input("Enter Gemini API Key", type="password")
-    paxton_api_key = st.text_input("Enter Paxton API Key", type="password", help="Leave blank for Mock Paxton")
+# 2. Connect to the "Vault" (Streamlit Secrets)
+# This replaces the sidebar credential boxes!
+client = openai.OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=st.secrets["OPENROUTER_API_KEY"],
+)
 
-if "messages" not in st.session_state:
-    st.session_state.messages =[]
+# 3. The Larry David Input Section
+query = st.text_area("What regulatory nightmare are we dealing with now?", 
+                     placeholder="e.g., A doctor wants us to pay for his 'educational' trip to Vegas...")
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+if st.button("Consult the Council"):
+    if not query:
+        st.warning("I can't help you if you don't tell me the problem. We're living in a society!")
+    else:
+        with st.spinner("The Council is arguing... please wait."):
+            try:
+                # THE REASONER (DeepSeek R1 via OpenRouter)
+                res_1 = client.chat.completions.create(
+                    model="deepseek/deepseek-r1",
+                    messages=[{"role": "user", "content": f"Analyze this healthcare compliance issue: {query}"}]
+                )
+                
+                # THE CHAIRPERSON (Gemini 1.5 Pro via OpenRouter)
+                final_prompt = f"""
+                You are a neurotic, highly experienced Chief Compliance Officer like Larry David. 
+                Review this analysis from your associate: {res_1.choices[0].message.content}
+                
+                Summarize the final verdict for Andrew. Be skeptical, be thorough, 
+                and remind him that we live in a society with rules!
+                """
+                
+                final_res = client.chat.completions.create(
+                    model="google/gemini-pro-1.5",
+                    messages=[{"role": "user", "content": final_prompt}]
+                )
 
-if prompt := st.chat_input("Ask a complex legal question..."):
-    
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    if not gemini_api_key:
-        st.error("Please enter your Gemini API Key in the sidebar to continue.")
-        st.stop()
-
-    with st.status("Querying Paxton AI database...") as status:
-        if paxton_api_key:
-            pass 
-        else:
-            time.sleep(1.5) 
-            paxton_raw_data = f"""[SIMULATED PAXTON RETRIEVAL]
-            Search Query: '{prompt}'
-            Results: Under standard US commercial code, liability requires proof of negligence. 
-            Precedent: 'Smith v. Global Corp (2019)' established that entities are not liable for unforeseeable events.
-            """
-        status.update(label="Paxton retrieved dense legal data!", state="complete")
-
-    with st.status("Flushing through Gemini...") as status:
-        genai.configure(api_key=gemini_api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash') 
-        
-        flush_prompt = f"""
-        You are a brilliant Senior Partner at a top law firm. A client asked: "{prompt}"
-        Our AI paralegal retrieved these facts: {paxton_raw_data}
-        Synthesize this raw data into a clear email to the client. Rely ONLY on the Paxton data provided.
-        """
-        
-        response = model.generate_content(flush_prompt)
-        status.update(label="Gemini synthesized the response!", state="complete")
-
-    with st.chat_message("assistant"):
-        st.markdown(response.text)
-    
-    st.session_state.messages.append({"role": "assistant", "content": response.text})
-
+                st.write("### 👓 The CCO's Verdict:")
+                st.markdown(final_res.choices[0].message.content)
+                
+                with st.expander("See Raw Regulatory Analysis"):
+                    st.write(res_1.choices[0].message.content)
+            except Exception as e:
+                st.error(f"The Council is on a coffee break. (Error: {e})")
+                st.info("Check your OpenRouter credits or Secret keys!")
