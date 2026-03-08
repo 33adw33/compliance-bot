@@ -3,33 +3,34 @@ import openai
 from fpdf import FPDF
 
 # 1. Page Config
-st.set_page_config(page_title="The Times | Legal & Compliance", layout="centered")
+st.set_page_config(page_title="Legal & COMPLAINCE COPILOT", layout="centered")
 
-# 2. Advanced Digital App CSS (NYT Aesthetic)
+# 2. Advanced NYT App UI Styling
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Lora:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;700&display=swap');
 
-    /* Global Foundation */
+    /* Global Typography */
     html, body, [class*="css"] {
         font-family: 'Lora', serif !important;
         background-color: #ffffff;
         color: #121212;
     }
 
-    /* The App Masthead */
+    /* Masthead - NYT App Style */
     .masthead-container {
         text-align: center;
         border-bottom: 2px solid #121212;
         padding-bottom: 5px;
-        margin-bottom: 2px;
+        margin-top: 20px;
     }
     .masthead-title {
         font-family: 'Playfair Display', serif !important;
-        font-size: 52px !important;
+        font-size: 42px !important;
         font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: -1px;
         margin-bottom: 0px;
-        letter-spacing: -1.5px;
     }
     .masthead-subline {
         font-family: 'Libre Franklin', sans-serif;
@@ -38,125 +39,112 @@ st.markdown("""
         font-weight: 700;
         border-bottom: 1px solid #e2e2e2;
         padding-bottom: 8px;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
         text-align: center;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }
 
-    /* Section Labeling (The "App" look) */
+    /* Section Labeling */
     .section-label {
         font-family: 'Libre Franklin', sans-serif;
         font-weight: 700;
         text-transform: uppercase;
-        font-size: 13px;
+        font-size: 12px;
         color: #121212;
         border-top: 1px solid #121212;
-        padding-top: 6px;
-        margin-top: 35px;
-        margin-bottom: 15px;
+        padding-top: 5px;
+        margin-top: 40px;
+        margin-bottom: 10px;
     }
 
-    /* Article Headlines */
+    /* Article Styling */
     .article-headline {
         font-family: 'Playfair Display', serif;
-        font-size: 34px;
+        font-size: 36px;
         font-weight: 700;
-        line-height: 1.05;
-        margin-bottom: 12px;
-        color: #121212;
+        line-height: 1.1;
+        margin-bottom: 15px;
     }
     
-    .article-summary {
-        font-family: 'Lora', serif;
-        font-size: 18px;
-        color: #444444;
-        line-height: 1.4;
-        margin-bottom: 20px;
-    }
-
-    /* Card/Module Styling */
     .stTextArea textarea {
         border-radius: 0px;
         border: 1px solid #cccccc;
         font-family: 'Lora', serif !important;
-        padding: 15px;
+        background-color: #fafafa;
     }
 
-    /* Primary Action Button */
+    /* The "Publish" Button */
     .stButton > button {
         background-color: #121212;
         color: #ffffff;
         font-family: 'Libre Franklin', sans-serif;
         text-transform: uppercase;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 700;
-        letter-spacing: 1px;
         border-radius: 0px;
         width: 100%;
-        border: 1px solid #121212;
-        padding: 10px;
-        transition: 0.3s;
+        border: none;
+        padding: 12px;
+        margin-top: 10px;
     }
     
     .stButton > button:hover {
-        background-color: #ffffff;
-        color: #121212;
+        background-color: #333333;
+        color: #ffffff;
     }
 
-    /* Result Area Bordering */
-    .result-block {
-        border-left: 1px solid #e2e2e2;
-        padding-left: 20px;
-        margin-top: 20px;
+    /* Sidebar and Footer */
+    [data-testid="stSidebar"] {
+        background-color: #f7f7f7;
+        border-right: 1px solid #e2e2e2;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. The Digital App Masthead
-st.markdown('<div class="masthead-container"><div class="masthead-title">The Times</div></div>', unsafe_allow_html=True)
-st.markdown('<div class="masthead-subline">Sunday, March 8, 2026 &nbsp; | &nbsp; Legal & Compliance Brief</div>', unsafe_allow_html=True)
+# 3. Branding
+st.markdown('<div class="masthead-container"><div class="masthead-title">My Legal and COMPLAINCE COPILOT</div></div>', unsafe_allow_html=True)
+st.markdown('<div class="masthead-subline">Sunday, March 8, 2026 &nbsp; | &nbsp; Official Investigative Record</div>', unsafe_allow_html=True)
 
-# 4. The Lead Input
-st.markdown('<div class="section-label">Submission for Analysis</div>', unsafe_allow_html=True)
-query = st.text_area("", placeholder="Enter case details for the Council's review...", height=120, label_visibility="collapsed")
+# 4. Input Module
+st.markdown('<div class="section-label">Case Briefing</div>', unsafe_allow_html=True)
+query = st.text_area("", placeholder="Enter the regulatory matter or legal facts for analysis...", height=150, label_visibility="collapsed")
 
-# 5. Tool Connection
+# 5. Connection
 client = openai.OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=st.secrets["OPENROUTER_API_KEY"],
 )
 
-if st.button("Publish Analysis"):
+if st.button("Generate Official Analysis"):
     if not query:
-        st.warning("Please enter a case for review.")
+        st.warning("Please provide case details.")
     else:
-        with st.status("Analyzing Records...", expanded=True):
+        with st.status("Reviewing Law and Precedent...", expanded=True):
             try:
-                # Prompt setup to match the structured memo style
-                prompt = f"Analyze this issue: {query}. Provide a plain-English summary, a formal memorandum (Abstract, Issues, Facts, Rationale with hover links, and Verdict), and a multi-personality Council deliberation. End with a 0 or 1 grade."
+                prompt = f"Analyze this issue: {query}. Provide a plain-English summary, a formal memorandum (Abstract, Issues, Facts, Rationale with hover links, and Verdict), and a multi-personality Council deliberation. End with a 0 or 1 grade. No emojis."
                 
                 res = client.chat.completions.create(
                     model="google/gemini-2.0-flash-001", 
                     messages=[
-                        {"role": "system", "content": "You are a professional auditor. Use formal language. No emojis."},
+                        {"role": "system", "content": "You are a professional auditor and legal analyst. Use formal language. No emojis."},
                         {"role": "user", "content": prompt}
                     ]
                 )
                 
                 output = res.choices[0].message.content
                 
-                # Render as a "Story"
-                st.markdown('<div class="section-label">The Report</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="article-headline">{query[:55]}...</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="result-block">{output}</div>', unsafe_allow_html=True)
+                # Render as the "Lead Article"
+                st.markdown('<div class="section-label">Findings & Deliberations</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="article-headline">The Copilot Report: {query[:50]}...</div>', unsafe_allow_html=True)
+                st.markdown(output)
 
-                # --- PDF GENERATION ---
+                # PDF Generation
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_font("Times", size=10)
-                pdf.multi_cell(0, 10, txt=f"THE TIMES: OFFICIAL RECORD\n\n{output.encode('ascii', 'ignore').decode('ascii')}")
+                pdf.multi_cell(0, 10, txt=f"LEGAL AND COMPLAINCE COPILOT: OFFICIAL RECORD\n\n{output.encode('ascii', 'ignore').decode('ascii')}")
                 pdf_output = bytes(pdf.output())
-                st.download_button(label="Download Full Record (PDF)", data=pdf_output, file_name="Times_Audit.pdf")
+                st.download_button(label="Download Full Brief (PDF)", data=pdf_output, file_name="Copilot_Analysis.pdf")
 
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"System Error: {e}")
