@@ -3,21 +3,26 @@ import openai
 from fpdf import FPDF
 from datetime import date
 
-# 1. Page Config & Interface Extermination
+# 1. Page Config & Total Interface Extermination
 st.set_page_config(page_title="Legal & Compliance Copilot", layout="centered")
 
-# This CSS block removes all Streamlit branding, menus, and the "Deploy" button
+# This enhanced block kills the footer, the "Made with Streamlit" badge, and the menu
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
             header {visibility: hidden;}
             footer {visibility: hidden;}
             .stDeployButton {display:none;}
+            #stDecoration {display:none;}
+            [data-testid="stStatusWidget"] {display:none;}
+            /* This specifically targets the "Made with Streamlit" host badge */
+            .viewerBadge_container__1QSob {display:none !important;}
+            div.styles_viewerBadge__3997m {display:none !important;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
-# 2. Editorial UI Styling
+# 2. Editorial UI Styling (NYT App Aesthetic)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Lora:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;700&display=swap');
