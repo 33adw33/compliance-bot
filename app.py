@@ -25,7 +25,7 @@ client = openai.OpenAI(
 
 # 4. Input
 query = st.text_area("State your case for the Council's review:", 
-                     placeholder="e.g., Staffing ratios in an LTC facility are 1:15...")
+                     placeholder="e.g., Facility staffing is 1:15 despite a 1:8 requirement...")
 
 if st.button("Convene the Council"):
     if not query:
@@ -33,18 +33,18 @@ if st.button("Convene the Council"):
     else:
         with st.status("The Council is auditing the records...", expanded=True) as status:
             try:
-                # ENFORCED CITATION PROMPT
+                # HYPERLINKED CITATION PROMPT
                 prompt = f"""
                 Analyze this healthcare compliance issue: {query}
                 
-                CRITICAL INSTRUCTION: You MUST use footnote markers [1], [2], [3] in the FIRST paragraph. 
-                If you do not include these numbers, the analysis is useless.
+                CRITICAL INSTRUCTION: You MUST include superscript markers that are LIVE HYPERLINKS in Section 1. 
+                Example: 'This violates 10 NYCRR [[1]](https://govt.westlaw.com/nycrr/)...'
 
                 STRUCTURE YOUR RESPONSE:
 
                 1. FORMAL REGULATORY FINDINGS: 
                    Write a dense, professional paragraph for Andrew Weingarten, MHA. 
-                   YOU MUST ATTACH A FOOTNOTE MARKER [1], [2], etc., TO EVERY LEGAL CLAIM.
+                   YOU MUST ATTACH A HYPERLINKED MARKER [[1]](URL), [[2]](URL), etc., TO EVERY LEGAL CLAIM.
 
                 2. THE COUNCIL DELIBERATION (THE CHAOS):
                    (Kingsfield, LD, Uncle Phil, Saul, RBG, Obama, etc.)
@@ -53,14 +53,16 @@ if st.button("Convene the Council"):
                    Professor Kingsfield delivers the final 'Zero or One' grade.
 
                 4. FOOTNOTES & CITATION KEY:
-                   Provide a numbered list matching the markers [1], [2] above. 
-                   List the EXACT regulation name (e.g., 10 NYCRR § 415.13) and a live link.
+                   Provide a numbered list matching the markers. 
+                   List the EXACT regulation name and the full URL again for reference.
                 """
                 
                 res = client.chat.completions.create(
                     model="google/gemini-2.0-flash-001", 
-                    messages=[{"role": "system", "content": "You are a professional legal auditor who ALWAYS uses numbered citations [1][2] in your findings."},
-                              {"role": "user", "content": prompt}]
+                    messages=[
+                        {"role": "system", "content": "You are a legal auditor. You ALWAYS embed live markdown hyperlinks into your citation numbers [1](url) so they are clickable."},
+                        {"role": "user", "content": prompt}
+                    ]
                 )
                 
                 verdict = res.choices[0].message.content
