@@ -3,52 +3,54 @@ import openai
 from fpdf import FPDF
 
 # 1. Page Config
-st.set_page_config(page_title="The Supreme Compliance Council", page_icon="⚖️")
+st.set_page_config(page_title="The Supreme Compliance Council", page_icon="⚖️", layout="wide")
 st.title("⚖️ The Supreme Compliance Council")
-st.markdown("---")
 
-# 2. Connection
+# 2. Sidebar Quick-Links (The Hyperlinks)
+st.sidebar.header("🔗 Regulatory Reference Library")
+st.sidebar.markdown("""
+* [NYCRR Title 10 (NYSDOH)](https://www.health.ny.gov/regulations/nycrr/title_10/)
+* [CMS State Operations Manual (Appendix PP)](https://www.cms.gov/medicare/provider-enrollment-and-certification/guidanceforlawsandregulations/nursing-homes)
+* [OIG Safe Harbor Regulations (42 CFR 1001.952)](https://oig.hhs.gov/compliance/safe-harbor-regulations/)
+* [Anti-Kickback Statute (42 U.S.C. § 1320a-7b)](https://www.law.cornell.edu/uscode/text/42/1320a-7b)
+* [Stark Law (42 U.S.C. § 1395nn)](https://www.law.cornell.edu/uscode/text/42/1395nn)
+""")
+
+# 3. Connection
 client = openai.OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=st.secrets["OPENROUTER_API_KEY"],
 )
 
-# 3. Input
+# 4. Input
 query = st.text_area("State your case for the Council's review:", 
-                     placeholder="e.g., A provider is ghosting our document request...")
+                     placeholder="e.g., A provider is offering a 'volume-based discount' on lab services...")
 
 if st.button("Convene the Council"):
     if not query:
         st.warning("The Council requires a prompt. It’s a society!")
     else:
-        with st.status("The Council is arguing in the hallway...", expanded=True) as status:
+        with st.status("The Council is auditing the records...", expanded=True) as status:
             try:
-                # The "Formal + Chaos" Prompt
+                # PROMPT WITH HYPERLINK INSTRUCTION
                 prompt = f"""
-                Analyze this issue: {query}
+                Analyze this healthcare compliance issue: {query}
                 
-                STRUCTURE YOUR RESPONSE EXACTLY AS FOLLOWS:
-
+                STRUCTURE:
                 1. FORMAL REGULATORY FINDINGS: 
-                   Write a single, dense, professional paragraph in the style of Westlaw, Paxton AI, and the ABA. 
-                   Address this to Andrew Weingarten, MHA. Use legal citations and cold, analytical authority.
+                   Write a professional paragraph addressed to Andrew Weingarten, MHA.
+                
+                2. CITATIONS & HYPERLINKS:
+                   Provide a list of relevant citations. 
+                   Where possible, format them as markdown links using these base URLs:
+                   - NYCRR Title 10: https://govt.westlaw.com/nycrr/
+                   - CMS F-Tags: https://www.cms.gov/files/document/appendix-pp-guidance-surveyor-long-term-care-facilities.pdf
+                   - Federal Statutes: https://www.law.cornell.edu/uscode/text/42/
+                
+                3. THE COUNCIL DELIBERATION (THE CHAOS):
+                   (Kingsfield, LD, Uncle Phil, Saul, RBG, Obama, etc.)
 
-                2. THE COUNCIL DELIBERATION (THE CHAOS):
-                   Provide a witty, multi-personality breakdown from these voices:
-                   - Professor Kingsfield: (Frame the Socratic challenge)
-                   - Larry David & Jerry Seinfeld: (Neurotic skepticism)
-                   - Uncle Phil: (Moral authority)
-                   - RBG & Obama: (Measured precision)
-                   - Saul Goodman & Jackie Chiles: (Loophole hunting)
-                   - Vinny Gambino: (Common sense)
-                   - Mickey Haller & Michael Clayton: (Fixer realism)
-                   - John Milton & Kevin Lomax: (Devil's advocate)
-                   - Rudy Baylor & Frank Galvin: (Underdog justice)
-                   - Dr. Gonzo: (Legal-adjacent insanity)
-
-                3. FINAL VERDICT & GRADE:
-                   Professor Kingsfield returns to deliver the final 'Zero or One' grade 
-                   and a clear 'Legal/Compliance Risk Level'.
+                4. FINAL VERDICT & GRADE.
                 """
                 
                 res = client.chat.completions.create(
@@ -57,34 +59,21 @@ if st.button("Convene the Council"):
                 )
                 
                 verdict = res.choices[0].message.content
-                status.update(label="Verdict reached!", state="complete", expanded=False)
+                status.update(label="Audit Complete!", state="complete", expanded=False)
                 
                 st.write("### 📜 The Official Council Verdict:")
                 st.markdown(verdict)
 
-                # --- PDF GENERATION (THE ERROR FIX) ---
+                # --- PDF GENERATION ---
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_font("Arial", size=10)
-                
-                # Replace tricky characters for Latin-1 PDF compatibility
-                def clean_text(text):
-                    return text.encode('ascii', 'ignore').decode('ascii')
-                
-                p_query = clean_text(query)
+                def clean_text(text): return text.encode('ascii', 'ignore').decode('ascii')
                 p_verdict = clean_text(verdict)
+                pdf.multi_cell(0, 10, txt=f"OFFICIAL AUDIT REPORT\nSUBMITTED BY: Andrew Weingarten, MHA\n\n{p_verdict}")
                 
-                pdf.multi_cell(0, 10, txt=f"ISSUE SUBMITTED:\n{p_query}\n\nVERDICT:\n{p_verdict}")
-                
-                # Use 'dest=S' and wrap in bytes() to ensure Streamlit likes it
                 pdf_output = bytes(pdf.output())
-                
-                st.download_button(
-                    label="📥 Download Council Verdict (PDF)", 
-                    data=pdf_output, 
-                    file_name="compliance_verdict.pdf", 
-                    mime="application/pdf"
-                )
+                st.download_button(label="📥 Download Audit Report (PDF)", data=pdf_output, file_name="audit_verdict.pdf", mime="application/pdf")
 
             except Exception as e:
                 st.error(f"The Council is in a heated sidebar. Error: {e}")
