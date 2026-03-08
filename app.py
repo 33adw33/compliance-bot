@@ -25,7 +25,7 @@ client = openai.OpenAI(
 
 # 4. Input
 query = st.text_area("State your case for the Council's review:", 
-                     placeholder="e.g., Facility staffing is 1:15 despite a 1:8 requirement...")
+                     placeholder="e.g., Staffing ratios in an LTC facility are 1:15...")
 
 if st.button("Convene the Council"):
     if not query:
@@ -33,18 +33,20 @@ if st.button("Convene the Council"):
     else:
         with st.status("The Council is auditing the records...", expanded=True) as status:
             try:
-                # HYPERLINKED CITATION PROMPT
+                # THE "HOVER PREVIEW" PROMPT
                 prompt = f"""
                 Analyze this healthcare compliance issue: {query}
                 
-                CRITICAL INSTRUCTION: You MUST include superscript markers that are LIVE HYPERLINKS in Section 1. 
-                Example: 'This violates 10 NYCRR [[1]](https://govt.westlaw.com/nycrr/)...'
+                CRITICAL INSTRUCTION: You MUST use 'Markdown Tooltips' for citations in Section 1. 
+                FORMAT: [ [n] ](URL "PREVIEW TEXT")
+                Example: 'This violates 10 NYCRR [[1]](https://govt.westlaw.com/nycrr/ "10 NYCRR 415.13: Requires sufficient nursing staff to provide care for all residents.")'
+                
+                When the user hovers over the number [1], they should see the 'PREVIEW TEXT'.
 
-                STRUCTURE YOUR RESPONSE:
-
+                STRUCTURE:
                 1. FORMAL REGULATORY FINDINGS: 
-                   Write a dense, professional paragraph for Andrew Weingarten, MHA. 
-                   YOU MUST ATTACH A HYPERLINKED MARKER [[1]](URL), [[2]](URL), etc., TO EVERY LEGAL CLAIM.
+                   Write a professional paragraph for Andrew Weingarten, MHA. 
+                   ATTACH A HOVER-PREVIEW CITATION [[n]](URL "PREVIEW TEXT") TO EVERY LEGAL CLAIM.
 
                 2. THE COUNCIL DELIBERATION (THE CHAOS):
                    (Kingsfield, LD, Uncle Phil, Saul, RBG, Obama, etc.)
@@ -53,14 +55,13 @@ if st.button("Convene the Council"):
                    Professor Kingsfield delivers the final 'Zero or One' grade.
 
                 4. FOOTNOTES & CITATION KEY:
-                   Provide a numbered list matching the markers. 
-                   List the EXACT regulation name and the full URL again for reference.
+                   Full list of citations with titles and URLs.
                 """
                 
                 res = client.chat.completions.create(
                     model="google/gemini-2.0-flash-001", 
                     messages=[
-                        {"role": "system", "content": "You are a legal auditor. You ALWAYS embed live markdown hyperlinks into your citation numbers [1](url) so they are clickable."},
+                        {"role": "system", "content": "You are a legal auditor. You embed hover-previews into your citations using markdown title attributes: [n](url 'preview text')."},
                         {"role": "user", "content": prompt}
                     ]
                 )
@@ -69,6 +70,7 @@ if st.button("Convene the Council"):
                 status.update(label="Audit Complete!", state="complete", expanded=False)
                 
                 st.write("### 📜 The Official Council Verdict:")
+                # Markdown rendering supports the "title" attribute for tooltips in many browsers
                 st.markdown(verdict)
 
                 # --- PDF GENERATION ---
