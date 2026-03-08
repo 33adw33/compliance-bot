@@ -1,16 +1,19 @@
 import streamlit as st
 import openai
 
+# 1. Page Config
 st.set_page_config(page_title="Chief Compliance Officer Bot", page_icon="🛡️")
 st.title("🛡️ The Compliance Council")
+st.subheader("March 2026 Edition: DeepSeek + Claude + Gemini")
 
+# 2. Connection
 client = openai.OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=st.secrets["OPENROUTER_API_KEY"],
 )
 
 query = st.text_area("What's the nightmare now?", 
-                     placeholder="e.g., A provider is ghosting our document request...")
+                     placeholder="e.g., Is it a kickback if I buy the surveyor a latte?")
 
 if st.button("Consult the Council"):
     if not query:
@@ -18,41 +21,47 @@ if st.button("Consult the Council"):
     else:
         with st.status("Council is deliberating...", expanded=True) as status:
             try:
-                # Agent 1: The Researcher (Using the most universal Claude ID)
-                st.write("Checking the OIG playbook...")
+                # Agent 1: The Heavy Researcher (DeepSeek V3)
+                st.write("🔍 DeepSeek V3 is cross-referencing OIG bulletins...")
                 res_1 = client.chat.completions.create(
-                    model="anthropic/claude-3-haiku", 
-                    messages=[{"role": "user", "content": f"Quickly identify the top 3 compliance risks here: {query}"}]
+                    model="deepseek/deepseek-v3", 
+                    messages=[{"role": "user", "content": f"Analyze this healthcare compliance issue for Stark/Anti-Kickback risks: {query}"}]
                 )
                 
-                # Agent 2: The CCO (Using the UNIVERSAL Gemini ID)
-                st.write("Getting the CCO's take...")
+                # Agent 2: The Ethical Guard (Claude 4.6 Sonnet)
+                st.write("⚖️ Claude 4.6 is checking HIPAA and ethical guardrails...")
+                res_2 = client.chat.completions.create(
+                    model="anthropic/claude-4.6-sonnet", 
+                    messages=[{"role": "user", "content": f"What are the privacy and ethical implications here? {query}"}]
+                )
+
+                # Agent 3: The CCO (Gemini 3.1 Flash - Larry David Mode)
+                st.write("👓 Formatting the Larry David verdict...")
                 final_prompt = f"""
-                You are a neurotic, skeptical Chief Compliance Officer like Larry David. 
-                Review these risks: {res_1.choices[0].message.content}
-                Give Andrew a quick, witty, but legally sound verdict. Mention 'it's a society!'
+                You are a neurotic, skeptical Chief Compliance Officer (think Larry David). 
+                Review these two expert opinions:
+                Analysis A: {res_1.choices[0].message.content}
+                Analysis B: {res_2.choices[0].message.content}
+                
+                Give Andrew a final verdict. Be witty, observant, and remind him that 
+                'it's a society' and we have to follow the rules. Keep it concise.
                 """
                 
-                # We are using the "google/gemini-flash-1.5" universal slug
                 final_res = client.chat.completions.create(
-                    model="google/gemini-flash-1.5", 
+                    model="google/gemini-3.1-flash", 
                     messages=[{"role": "user", "content": final_prompt}]
                 )
 
                 status.update(label="Verdict reached!", state="complete", expanded=False)
 
-                st.write("### 👓 The CCO's Verdict:")
+                st.write("---")
+                st.write("### 👓 The CCO's Final Verdict:")
                 st.markdown(final_res.choices[0].message.content)
+                
+                with st.expander("See Raw Council Deliberations"):
+                    st.write("**DeepSeek (Regulatory):**", res_1.choices[0].message.content)
+                    st.write("**Claude (Ethics/Privacy):**", res_2.choices[0].message.content)
+
             except Exception as e:
-                # If Gemini is still 404-ing, let's use a backup model so you aren't stuck!
-                st.write("Gemini is stuck in traffic, calling the backup CCO...")
-                try:
-                    final_res = client.chat.completions.create(
-                        model="openai/gpt-4o-mini", 
-                        messages=[{"role": "user", "content": final_prompt}]
-                    )
-                    st.write("### 👓 The CCO's Verdict (Backup):")
-                    st.markdown(final_res.choices[0].message.content)
-                    status.update(label="Verdict reached via backup!", state="complete", expanded=False)
-                except:
-                    st.error(f"The Council is on a coffee break. (Error: {e})")
+                st.error(f"The Council is on a coffee break. (Error: {e})")
+                st.info("Check your OpenRouter credits—DeepSeek V3 is cheap, but not free!")
