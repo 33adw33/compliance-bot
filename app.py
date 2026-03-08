@@ -15,35 +15,41 @@ client = openai.OpenAI(
 
 # 3. Input
 query = st.text_area("State your case for the Council's review:", 
-                     placeholder="e.g., A vendor offered me courtside Knicks tickets...")
+                     placeholder="e.g., A provider is ghosting our document request...")
 
 if st.button("Convene the Council"):
     if not query:
-        st.warning("The Council requires a prompt. We're living in a society!")
+        st.warning("The Council requires a prompt. It’s a society!")
     else:
-        with st.status("The Council is deliberating (and arguing)...", expanded=True) as status:
+        with st.status("The Council is arguing in the hallway...", expanded=True) as status:
             try:
-                st.write("🎙️ Summoning the legal legends...")
-                
-                # The "Super-Prompt" with Uncle Phil added
+                # The "Formal + Chaos" Prompt
                 prompt = f"""
-                You are the Supreme Compliance Council. Analyze this issue: {query}
+                Analyze this issue: {query}
                 
-                Synthesize a single, unified response using these specific voices:
-                - Larry David & Jerry Seinfeld: The neurotic, 'it's a society' skepticism.
-                - Uncle Phil (Judge Banks): The booming authority, moral integrity, and 'not in my house' discipline.
-                - RBG & Obama: The intellectual, measured, constitutional precision.
-                - Saul Goodman & Jackie Chiles: The fast-talking, 'outrageous' loophole hunting.
-                - Vinny Gambino: The street-smart, 'magic grits' common sense.
-                - Mickey Haller & Michael Clayton: The gritty, 'fixer' realism.
-                - John Milton & Kevin Lomax: The dark, devil's advocate intensity.
-                - Rudy Baylor & Frank Galvin: The underdog's passion for justice.
-                - Dr. Gonzo: The drug-addled, legal-adjacent insanity.
+                STRUCTURE YOUR RESPONSE EXACTLY AS FOLLOWS:
 
-                VERDICT REQUIREMENTS:
-                1. Professional enough for a Healthcare Master of Administration (MHA).
-                2. Witty, sharp, and distinctively character-driven.
-                3. Conclude with a clear 'Legal/Compliance Risk Level'.
+                1. FORMAL REGULATORY FINDINGS: 
+                   Write a single, dense, professional paragraph in the style of Westlaw, Paxton AI, and the ABA. 
+                   Use citations where appropriate (e.g., 42 U.S.C. § 1320a-7b). 
+                   Address this to Andrew Weingarten, MHA. It must be cold, analytical, and authoritative.
+
+                2. THE COUNCIL DELIBERATION (THE CHAOS):
+                   Provide a witty, multi-personality breakdown from these voices:
+                   - Professor Kingsfield: (Frame the Socratic challenge)
+                   - Larry David & Jerry Seinfeld: (Neurotic skepticism)
+                   - Uncle Phil: (Moral authority)
+                   - RBG & Obama: (Measured precision)
+                   - Saul Goodman & Jackie Chiles: (Loophole hunting)
+                   - Vinny Gambino: (Common sense)
+                   - Mickey Haller & Michael Clayton: (Fixer realism)
+                   - John Milton & Kevin Lomax: (Devil's advocate)
+                   - Rudy Baylor & Frank Galvin: (Underdog justice)
+                   - Dr. Gonzo: (Legal-adjacent insanity)
+
+                3. FINAL VERDICT & GRADE:
+                   Professor Kingsfield returns to deliver the final 'Zero or One' grade 
+                   and a clear 'Legal/Compliance Risk Level'.
                 """
                 
                 res = client.chat.completions.create(
@@ -58,19 +64,24 @@ if st.button("Convene the Council"):
                 st.markdown(verdict)
 
                 # --- PDF GENERATION ---
-                class PDF(FPDF):
-                    def header(self):
-                        self.set_font('Arial', 'B', 15)
-                        self.cell(0, 10, 'The Supreme Compliance Council Report', 0, 1, 'C')
-                        self.ln(5)
-
-                pdf = PDF()
+                pdf = FPDF()
                 pdf.add_page()
-                pdf.set_font("Arial", size=11)
-                pdf.multi_cell(0, 10, txt=f"ISSUE SUBMITTED:\n{query}\n\nVERDICT:\n{verdict}".encode('latin-1', 'ignore').decode('latin-1'))
+                pdf.set_font("Arial", size=10)
                 
-                pdf_bytes = pdf.output(dest='S').encode('latin-1')
-                st.download_button(label="📥 Download Council Verdict (PDF)", data=pdf_bytes, file_name="compliance_verdict.pdf", mime="application/pdf")
+                # Cleaning characters for Latin-1 PDF
+                clean_verdict = verdict.replace('\u2013', '-').replace('\u2014', '-').replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"').replace('\u2026', '...')
+                clean_query = query.replace('\u2013', '-').replace('\u2014', '-').replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"').replace('\u2026', '...')
+                
+                pdf.multi_cell(0, 10, txt=f"ISSUE SUBMITTED:\n{clean_query}\n\nVERDICT:\n{clean_verdict}".encode('latin-1', 'replace').decode('latin-1'))
+                
+                pdf_output = pdf.output(dest='S')
+                
+                st.download_button(
+                    label="📥 Download Council Verdict (PDF)", 
+                    data=pdf_output, 
+                    file_name="compliance_verdict.pdf", 
+                    mime="application/pdf"
+                )
 
             except Exception as e:
                 st.error(f"The Council is in a heated sidebar. Error: {e}")
