@@ -6,7 +6,7 @@ from datetime import date
 # 1. Page Config
 st.set_page_config(page_title="Legal & Compliance Copilot", layout="centered")
 
-# 2. NYT Digital App UI Styling
+# 2. NYT Digital App UI Styling (Updated for Title Case & Clean Subline)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Lora:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;700&display=swap');
@@ -18,7 +18,7 @@ st.markdown("""
         color: #121212;
     }
 
-    /* Masthead - Editorial Style */
+    /* Masthead - Refined Title Case Styling */
     .masthead-container {
         text-align: center;
         border-bottom: 2px solid #121212;
@@ -27,16 +27,16 @@ st.markdown("""
     }
     .masthead-title {
         font-family: 'Playfair Display', serif !important;
-        font-size: 38px !important;
+        font-size: 40px !important;
         font-weight: 700;
-        text-transform: uppercase;
         letter-spacing: -1px;
         margin-bottom: 0px;
+        color: #121212;
     }
     .masthead-subline {
         font-family: 'Libre Franklin', sans-serif;
         text-transform: uppercase;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
         border-bottom: 1px solid #e2e2e2;
         padding-bottom: 8px;
@@ -94,10 +94,10 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Branding & Date Line
-today = date.today().strftime("%A, %B %d, %Y").upper()
+# 3. Branding & Date Line (Simplified)
+today = date.today().strftime("%A, %B %d, %Y")
 st.markdown(f'<div class="masthead-container"><div class="masthead-title">My Legal and Compliance Copilot</div></div>', unsafe_allow_html=True)
-st.markdown(f'<div class="masthead-subline">{today} &nbsp; | &nbsp; OFFICIAL INVESTIGATIVE RECORD</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="masthead-subline">{today}</div>', unsafe_allow_html=True)
 
 # 4. Submission Module
 st.markdown('<div class="section-label">Case Briefing</div>', unsafe_allow_html=True)
@@ -115,7 +115,7 @@ if st.button("Generate Official Analysis"):
     else:
         with st.status("Analyzing Precedent...", expanded=True):
             try:
-                # Optimized Hybrid Prompt
+                # Hybrid Prompt
                 prompt = f"""
                 Analyze this issue: {query}
                 
@@ -152,7 +152,7 @@ if st.button("Generate Official Analysis"):
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_font("Times", size=10)
-                pdf.multi_cell(0, 10, txt=f"LEGAL AND COMPLIANCE COPILOT: OFFICIAL RECORD\n\n{output.encode('ascii', 'ignore').decode('ascii')}")
+                pdf.multi_cell(0, 10, txt=f"LEGAL AND COMPLIANCE COPILOT REPORT\n\n{output.encode('ascii', 'ignore').decode('ascii')}")
                 pdf_output = bytes(pdf.output())
                 st.download_button(label="Download Full Brief (PDF)", data=pdf_output, file_name="Copilot_Analysis.pdf")
 
