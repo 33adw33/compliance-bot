@@ -12,9 +12,9 @@ st.sidebar.header("🔗 Regulatory Reference Library")
 st.sidebar.markdown("""
 * [NYCRR Title 10 (NYSDOH)](https://govt.westlaw.com/nycrr/index?contextData=(sc.Default)&rs=confluence.1.0)
 * [CMS State Operations Manual](https://www.cms.gov/medicare/provider-enrollment-and-certification/guidanceforlawsandregulations/nursing-homes)
-* [OIG Safe Harbor Regulations](https://oig.hhs.gov/compliance/safe-harbor-regulations/)
 * [Anti-Kickback Statute (42 U.S.C.)](https://www.law.cornell.edu/uscode/text/42/1320a-7b)
-* [Stark Law (42 U.S.C.)](https://www.law.cornell.edu/uscode/text/42/1395nn)
+* [SEC / Financial Rules](https://www.sec.gov/rules/final)
+* [GDPR / Data Privacy](https://gdpr-info.eu/)
 """)
 
 # 3. Connection
@@ -25,7 +25,7 @@ client = openai.OpenAI(
 
 # 4. Input
 query = st.text_area("State your case for the Council's review:", 
-                     placeholder="e.g., Staffing ratios in an LTC facility are 1:15...")
+                     placeholder="State the issue (e.g., healthcare, tech, finance, or even superheroes)...")
 
 if st.button("Convene the Council"):
     if not query:
@@ -33,15 +33,14 @@ if st.button("Convene the Council"):
     else:
         with st.status("The Council is auditing the records...", expanded=True) as status:
             try:
-                # THE "HOVER PREVIEW" PROMPT
+                # DYNAMIC DOMAIN ADAPTATION PROMPT
                 prompt = f"""
-                Analyze this healthcare compliance issue: {query}
+                Analyze this issue: {query}
                 
-                CRITICAL INSTRUCTION: You MUST use 'Markdown Tooltips' for citations in Section 1. 
-                FORMAT: [ [n] ](URL "PREVIEW TEXT")
-                Example: 'This violates 10 NYCRR [[1]](https://govt.westlaw.com/nycrr/ "10 NYCRR 415.13: Requires sufficient nursing staff to provide care for all residents.")'
-                
-                When the user hovers over the number [1], they should see the 'PREVIEW TEXT'.
+                CRITICAL INSTRUCTION: 
+                Identify the specific domain/industry of the query (e.g. Healthcare, Technology, Finance, Civil, etc.). 
+                Start your response IMMEDIATELY with this line:
+                "Based on the findings, I will conduct an analysis of the [DETECTED DOMAIN] compliance implications pertaining to the determination of whether {query[:50]}..., in accordance with the prescribed analytical framework."
 
                 STRUCTURE:
                 1. FORMAL REGULATORY FINDINGS: 
@@ -55,13 +54,13 @@ if st.button("Convene the Council"):
                    Professor Kingsfield delivers the final 'Zero or One' grade.
 
                 4. FOOTNOTES & CITATION KEY:
-                   Full list of citations with titles and URLs.
+                   Detailed list of all regulations mentioned.
                 """
                 
                 res = client.chat.completions.create(
                     model="google/gemini-2.0-flash-001", 
                     messages=[
-                        {"role": "system", "content": "You are a legal auditor. You embed hover-previews into your citations using markdown title attributes: [n](url 'preview text')."},
+                        {"role": "system", "content": "You are a professional auditor. Never use conversational filler. Start every response with 'Based on the findings...' and replace [DETECTED DOMAIN] with the appropriate industry."},
                         {"role": "user", "content": prompt}
                     ]
                 )
@@ -70,7 +69,6 @@ if st.button("Convene the Council"):
                 status.update(label="Audit Complete!", state="complete", expanded=False)
                 
                 st.write("### 📜 The Official Council Verdict:")
-                # Markdown rendering supports the "title" attribute for tooltips in many browsers
                 st.markdown(verdict)
 
                 # --- PDF GENERATION ---
