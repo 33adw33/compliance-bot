@@ -25,7 +25,7 @@ client = openai.OpenAI(
 
 # 4. Input
 query = st.text_area("State your case for the Council's review:", 
-                     placeholder="What's the issue? (LTC staffing, data privacy, Batman's legal status...)")
+                     placeholder="State the issue (e.g., LTC staffing, Clark Kent's legal status, etc.)...")
 
 if st.button("Convene the Council"):
     if not query:
@@ -33,21 +33,20 @@ if st.button("Convene the Council"):
     else:
         with st.status("The Council is auditing the records...", expanded=True) as status:
             try:
-                # THE "NORMAL HUMAN" PROMPT
+                # THE "CLEAN START" PROMPT
                 prompt = f"""
                 Analyze this issue: {query}
                 
                 CRITICAL INSTRUCTION: 
-                DO NOT USE CONVERSATIONAL FILLER (No 'Okay', 'Sure', 'I will analyze').
-                START IMMEDIATELY with a single, clear introductory line that explains what the issue is to anyone reading it.
-                Example: 'This is an analysis of the Healthcare compliance implications regarding [The Issue].'
-                
-                (Identify the domain naturally—Healthcare, Technology, Legal, etc.—and do not use brackets).
+                START IMMEDIATELY with a simple, direct introductory sentence. 
+                DO NOT use the word 'Legal' unless it is a court case. 
+                Use the word 'Analysis'.
+                Example: 'This is an analysis of the familial relationship between Jonathan Kent and Clark Kent within the DC Comics universe.'
 
                 STRUCTURE:
                 1. FORMAL REGULATORY FINDINGS: 
                    Professional paragraph for Andrew Weingarten, MHA. 
-                   ATTACH A HOVER-PREVIEW CITATION [[n]](URL "PREVIEW TEXT") TO EVERY LEGAL CLAIM.
+                   ATTACH A HOVER-PREVIEW CITATION [[n]](URL "PREVIEW TEXT") TO EVERY CLAIM.
 
                 2. THE COUNCIL DELIBERATION (THE CHAOS):
                    (Kingsfield, LD, Uncle Phil, Saul, RBG, Obama, etc.)
@@ -56,13 +55,13 @@ if st.button("Convene the Council"):
                    Professor Kingsfield delivers the final 'Zero or One' grade.
 
                 4. FOOTNOTES & CITATION KEY:
-                   Detailed list of all regulations mentioned.
+                   Detailed list of all regulations or sources mentioned.
                 """
                 
                 res = client.chat.completions.create(
                     model="google/gemini-2.0-flash-001", 
                     messages=[
-                        {"role": "system", "content": "You are a professional auditor. You never use filler. You start every response immediately with a direct one-sentence introduction explaining the domain and the issue to the reader. No brackets, no robotic pre-amble."},
+                        {"role": "system", "content": "You are a professional auditor. You never use conversational filler. You start every response immediately with 'This is an analysis of...' followed by a brief description of the user's query. No brackets, no 'Okay', no 'Sure'."},
                         {"role": "user", "content": prompt}
                     ]
                 )
